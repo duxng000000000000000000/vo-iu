@@ -33,7 +33,7 @@
             background-size: 40px 40px;
         }
 
-        /* === HIỆU ỨNG BACKGROUND === */
+        /* === HIỆU ỨNG GROUND === */
         .effects-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 0; overflow: hidden;
@@ -274,10 +274,10 @@
     <section id="screen-3" class="screen">
         <div class="calendar-container">
             <!-- THAY LINK ẢNH VỢ BẠN VÀO ĐÂY -->
-            <img src="https://placehold.co/200x250/ffb6c1/ffffff?text=Vo+1" class="floating-photo fp-1" alt="Wife">
-            <img src="https://placehold.co/200x250/ff6b81/ffffff?text=Vo+2" class="floating-photo fp-2" alt="Wife">
-            <img src="https://placehold.co/200x250/f48fb1/ffffff?text=Vo+3" class="floating-photo fp-3" alt="Wife">
-            <img src="https://placehold.co/200x250/ffb6c1/ffffff?text=Vo+4" class="floating-photo fp-4" alt="Wife">
+            <img src="cute1.jpg" class="floating-photo fp-1" alt="Wife">
+            <img src="cute2.jpg" class="floating-photo fp-2" alt="Wife">
+            <img src="cute3.jpg" class="floating-photo fp-3" alt="Wife">
+            <img src="cute4.jpg" class="floating-photo fp-4" alt="Wife">
 
             <div class="desk-calendar">
                 <div class="cal-header">THÁNG 11</div>
@@ -321,7 +321,7 @@
         <div class="bday-content">
             <div class="age-circle" id="age-number">18</div>
             <!-- THAY LINK ẢNH VỢ BẠN VÀO ĐÂY -->
-            <img src="https://placehold.co/400x500/ffb6c1/ffffff?text=Anh+Thuong+Em" class="bday-photo" alt="Birthday Girl">
+            <img src="first.jpg" class="bday-photo" alt="Birthday Girl">
         </div>
 
         <button class="btn" onclick="nextScreen(5, 6)" style="margin-top: 40px;">Đi tiếp nè ➔</button>
@@ -331,10 +331,10 @@
     <section id="screen-6" class="screen">
         <h2 class="memories-title">Vợ xinh nhất quả đất</h2>
         <div class="gallery">
-            <div class="photo-frame"><img src="https://placehold.co/400x400/ffb6c1/ffffff?text=Memory+1" alt="Memory 1"></div>
-            <div class="photo-frame"><img src="https://placehold.co/400x400/ff6b81/ffffff?text=Memory+2" alt="Memory 2"></div>
-            <div class="photo-frame"><img src="https://placehold.co/400x400/ffb6c1/ffffff?text=Memory+3" alt="Memory 3"></div>
-            <div class="photo-frame"><img src="https://placehold.co/400x400/ff6b81/ffffff?text=Memory+4" alt="Memory 4"></div>
+            <div class="photo-frame"><img src="pe1.jpg" alt="Memory 1"></div>
+            <div class="photo-frame"><img src="pe2.jpg" alt="Memory 2"></div>
+            <div class="photo-frame"><img src="pe3.jpg" alt="Memory 3"></div>
+            <div class="photo-frame"><img src="pe4.jpg" alt="Memory 4"></div>
         </div>
         <button class="btn" onclick="nextScreen(6, 7)">Xem tiếp ➔</button>
     </section>
@@ -343,10 +343,10 @@
     <section id="screen-7" class="screen">
         <h2 class="memories-title">Our Memories :3</h2>
         <div class="gallery">
-            <div class="photo-frame"><img src="https://placehold.co/400x400/ffb6c1/ffffff?text=Memory+1" alt="Memory 1"></div>
-            <div class="photo-frame"><img src="https://placehold.co/400x400/ff6b81/ffffff?text=Memory+2" alt="Memory 2"></div>
-            <div class="photo-frame"><img src="https://placehold.co/400x400/ffb6c1/ffffff?text=Memory+3" alt="Memory 3"></div>
-            <div class="photo-frame"><img src="https://placehold.co/400x400/ff6b81/ffffff?text=Memory+4" alt="Memory 4"></div>
+            <div class="photo-frame"><img src="me1.jpg" alt="Memory 1"></div>
+            <div class="photo-frame"><img src="me2.jpg" alt="Memory 2"></div>
+            <div class="photo-frame"><img src="me3.jpg" alt="Memory 3"></div>
+            <div class="photo-frame"><img src="me4.jpg" alt="Memory 4"></div>
         </div>
         <button class="btn" onclick="nextScreen(7, 8)">Xem tiếp ➔</button>
     </section>
@@ -364,8 +364,8 @@
                 Anh yêu em! Chồng yêu vợ! hihi
             </div>
             <div class="letter-photos">
-                <img src="https://placehold.co/200x250/ffb6c1/ffffff?text=Anh" alt="Photo 1">
-                <img src="https://placehold.co/200x250/ff6b81/ffffff?text=Em" alt="Photo 2">
+                <img src="letter1.jpg" alt="Photo 1">
+                <img src="letter2.jpg" alt="Photo 2">
             </div>
             <div style="text-align: center; margin-top: 30px;">
                 <button class="btn" onclick="nextScreen(8, 9)">típp 🎵</button>
@@ -395,7 +395,7 @@
             </audio>
 
             <button class="btn cassette-play" id="cassette-button" onclick="toggleCassette()">▶ Play</button>
-            <p class="music-status" id="cassette-status">Bấm Play để nghe bài hát ❤️</p>
+            <p class="music-status" id="cassette-status">Bấm Play để nghe</p>
             <p style="margin-bottom: 20px; font-style: italic; font-size: 1.2rem;">Mãi yêu em! ❤️</p>
             <button class="btn" onclick="nextScreen(9, 1)" style="background: #fff; color: #6b1d1d;">Xem lại từ đầu 🔄</button>
         </div>
@@ -451,7 +451,7 @@
 
         // === NHẠC NỀN CHO TOÀN BỘ WEBSITE ===
         // THAY LINK NHẠC NỀN CỦA BẠN VÀO src
-        const backgroundMusic = new Audio('YOUR_BACKGROUND_MUSIC_LINK.mp3');
+        const backgroundMusic = new Audio('the-only-exception-acoustic-instrumental.mp3');
         backgroundMusic.loop = true;
         backgroundMusic.volume = 0.35;
         let backgroundMusicStarted = false;
