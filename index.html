@@ -556,6 +556,15 @@
             const currentScreen = document.getElementById(`screen-${currentId}`);
             const nextScreen = document.getElementById(`screen-${nextId}`);
             currentScreen.classList.remove('active');
+
+            if (currentId === 9 && nextId !== 9 && !cassetteAudio.paused) {
+                cassetteAudio.pause();
+                document.getElementById('cassette').classList.remove('playing');
+                document.getElementById('cassette-button').textContent = '▶ Play';
+                document.getElementById('cassette-status').textContent = 'Đã tạm dừng';
+                resumeBackgroundMusic();
+            }
+
             nextScreen.scrollTop = 0;
             if (nextId === 8) {
                 letterContainer.scrollTop = 0;
@@ -624,14 +633,29 @@
         backgroundMusic.loop = true;
         backgroundMusic.volume = 0.35;
         let backgroundMusicStarted = false;
+        let cassetteHasPriority = false;
 
         function startBackgroundMusic() {
-            if (backgroundMusicStarted) return;
+            // Không bật nhạc nền khi cassette đang được yêu cầu phát.
+            if (backgroundMusicStarted || cassetteHasPriority) return;
             backgroundMusic.play().then(() => {
                 backgroundMusicStarted = true;
+                // Tránh trường hợp lệnh autoplay hoàn tất muộn sau khi cassette đã bắt đầu.
+                if (cassetteHasPriority) backgroundMusic.pause();
             }).catch(() => {
                 // Trình duyệt chặn autoplay: sẽ thử lại ở lần người dùng tương tác tiếp theo.
             });
+        }
+
+        function resumeBackgroundMusic() {
+            cassetteHasPriority = false;
+            if (backgroundMusicStarted) {
+                backgroundMusic.play().catch(() => {
+                    // Một số trình duyệt có thể yêu cầu người dùng tương tác lại.
+                });
+            } else {
+                startBackgroundMusic();
+            }
         }
 
         // Thử autoplay ngay khi mở website.
@@ -648,27 +672,37 @@
         // === CASSETTE ===
         const cassetteAudio = document.getElementById('cassette-audio');
 
+        function updateCassetteUI(isPlaying, statusText) {
+            document.getElementById('cassette').classList.toggle('playing', isPlaying);
+            document.getElementById('cassette-button').textContent = isPlaying ? '❚❚ Pause' : '▶ Play';
+            document.getElementById('cassette-status').textContent = statusText;
+        }
+
         function toggleCassette() {
             if (cassetteAudio.paused) {
+                // Đặt ưu tiên cho cassette ngay lập tức để click không bật lại nhạc nền.
+                cassetteHasPriority = true;
+                backgroundMusic.pause();
+
                 cassetteAudio.play().then(() => {
-                    document.getElementById('cassette').classList.add('playing');
-                    document.getElementById('cassette-button').textContent = '❚❚ Pause';
-                    document.getElementById('cassette-status').textContent = 'Đang phát... ❤️';
+                    updateCassetteUI(true, 'Đang phát... ❤️');
+                    // Phòng trường hợp nhạc nền vừa hoàn tất lệnh play cùng lúc.
+                    backgroundMusic.pause();
                 }).catch(() => {
-                    document.getElementById('cassette-status').textContent = 'Không thể phát nhạc. Hãy kiểm tra link nhạc.';
+                    cassetteHasPriority = false;
+                    updateCassetteUI(false, 'Không thể phát nhạc. Hãy kiểm tra link nhạc.');
+                    resumeBackgroundMusic();
                 });
             } else {
                 cassetteAudio.pause();
-                document.getElementById('cassette').classList.remove('playing');
-                document.getElementById('cassette-button').textContent = '▶ Play';
-                document.getElementById('cassette-status').textContent = 'Đã tạm dừng';
+                updateCassetteUI(false, 'Đã tạm dừng');
+                resumeBackgroundMusic();
             }
         }
 
         cassetteAudio.addEventListener('ended', () => {
-            document.getElementById('cassette').classList.remove('playing');
-            document.getElementById('cassette-button').textContent = '▶ Play';
-            document.getElementById('cassette-status').textContent = 'Bấm Play để nghe lại ❤️';
+            updateCassetteUI(false, 'Bấm Play để nghe lại ❤️');
+            resumeBackgroundMusic();
         });
     </script>
 </body>
