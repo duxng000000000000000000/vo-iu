@@ -209,15 +209,20 @@
         .letter-photos img:nth-child(2) { transform: rotate(5deg); }
         .letter-photos img:hover { transform: scale(1.2) rotate(0); z-index: 10; }
 
-        /* === MÀN HÌNH 8: BÀI HÁT === */
+        /* === MÀN HÌNH 9: CASSETTE === */
         .music-container { background: #6b1d1d; color: white; padding: 35px; border-radius: 20px; max-width: 650px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(107, 29, 29, 0.5); border: 2px solid #ffb6c1; z-index: 2; }
-        .music-container h2 { font-family: 'Dancing Script', cursive; font-size: 2.8rem; margin-bottom: 20px; color: #ffb6c1; }
-        .vinyl-container { position: relative; width: 150px; height: 150px; margin: 0 auto 20px auto; }
-        .vinyl-record { width: 100%; height: 100%; background: #111; border-radius: 50%; position: absolute; animation: spin 4s linear infinite; border: 5px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.6); }
-        .vinyl-record::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 45px; height: 45px; background: var(--pink-dark); border-radius: 50%; }
-        .vinyl-record::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; background: #fff; border-radius: 50%; }
-        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 2px solid #ffb6c1; z-index: 1; }
-        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .music-container h2 { font-family: 'Dancing Script', cursive; font-size: 2.8rem; margin-bottom: 25px; color: #ffb6c1; }
+        .cassette-wrap { display: flex; justify-content: center; align-items: center; margin: 5px auto 25px; perspective: 800px; }
+        .cassette { width: 330px; max-width: 90vw; height: 205px; background: linear-gradient(145deg, #f5d0d8, #d99aa9); border-radius: 18px; border: 5px solid #8f5663; box-shadow: inset 0 4px 10px rgba(255,255,255,.45), 0 15px 30px rgba(0,0,0,.4); position: relative; padding: 25px; transform: rotate(-2deg); transition: transform .3s ease, box-shadow .3s ease; cursor: pointer; }
+        .cassette:hover { transform: rotate(0deg) translateY(-5px); box-shadow: inset 0 4px 10px rgba(255,255,255,.45), 0 20px 35px rgba(0,0,0,.45); }
+        .cassette-label { height: 68px; background: #fff4f6; color: #6b1d1d; border-radius: 8px; padding: 10px; font-weight: 700; font-size: 1.05rem; letter-spacing: 1px; border: 2px dashed #d98295; }
+        .cassette-reels { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding: 0 15px; }
+        .reel { width: 47px; height: 47px; background: #6b1d1d; border: 7px dotted #f7d8df; border-radius: 50%; box-shadow: inset 0 0 0 5px #9b5362; animation: spin 4s linear infinite; animation-play-state: paused; }
+        .cassette.playing .reel { animation-play-state: running; }
+        .tape-window { width: 115px; height: 32px; background: #542020; border: 4px solid #a66b75; border-radius: 8px; }
+        .cassette-play { margin: 0 auto 20px; min-width: 150px; }
+        .music-status { margin-bottom: 20px; font-style: italic; opacity: .9; }
+        .music-source { display: none; }
 
         /* === KEYFRAMES === */
         @keyframes bounceText { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -368,17 +373,29 @@
         </div>
     </section>
 
-    <!-- 9. BÀI HÁT -->
+    <!-- 9. BÀI HÁT - CASSETTE -->
     <section id="screen-9" class="screen">
         <div class="music-container">
             <h2>Bài hát dành tặng vợ</h2>
-            <div class="vinyl-container"><div class="vinyl-record"></div></div>
-            
-            <div class="video-wrapper">
-                <!-- NHỚ ĐỔI LINK YOUTUBE EMBED TẠI ĐÂY -->
-                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&showinfo=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+            <div class="cassette-wrap">
+                <div class="cassette" id="cassette" onclick="toggleCassette()">
+                    <div class="cassette-label">MÃI YÊU VỢ ❤️</div>
+                    <div class="cassette-reels">
+                        <div class="reel"></div>
+                        <div class="tape-window"></div>
+                        <div class="reel"></div>
+                    </div>
+                </div>
             </div>
-            
+
+            <!-- THAY LINK NHẠC CỦA BẠN VÀO src -->
+            <audio id="cassette-audio" class="music-source" preload="auto">
+                <source src="YOUR_CASSETTE_MUSIC_LINK.mp3" type="audio/mpeg">
+            </audio>
+
+            <button class="btn cassette-play" id="cassette-button" onclick="toggleCassette()">▶ Play</button>
+            <p class="music-status" id="cassette-status">Bấm Play để nghe bài hát ❤️</p>
             <p style="margin-bottom: 20px; font-style: italic; font-size: 1.2rem;">Mãi yêu em! ❤️</p>
             <button class="btn" onclick="nextScreen(9, 1)" style="background: #fff; color: #6b1d1d;">Xem lại từ đầu 🔄</button>
         </div>
@@ -432,7 +449,58 @@
             }
         }
 
-        window.onload = initEffects;
+        // === NHẠC NỀN CHO TOÀN BỘ WEBSITE ===
+        // THAY LINK NHẠC NỀN CỦA BẠN VÀO src
+        const backgroundMusic = new Audio('YOUR_BACKGROUND_MUSIC_LINK.mp3');
+        backgroundMusic.loop = true;
+        backgroundMusic.volume = 0.35;
+        let backgroundMusicStarted = false;
+
+        function startBackgroundMusic() {
+            if (backgroundMusicStarted) return;
+            backgroundMusic.play().then(() => {
+                backgroundMusicStarted = true;
+            }).catch(() => {
+                // Trình duyệt chặn autoplay: sẽ thử lại ở lần người dùng tương tác tiếp theo.
+            });
+        }
+
+        // Thử autoplay ngay khi mở website.
+        window.addEventListener('load', () => {
+            initEffects();
+            startBackgroundMusic();
+        });
+
+        // Nếu autoplay bị chặn, click mở phong bì sẽ bắt đầu nhạc.
+        document.addEventListener('click', () => {
+            startBackgroundMusic();
+        }, { once: false });
+
+        // === CASSETTE ===
+        const cassetteAudio = document.getElementById('cassette-audio');
+
+        function toggleCassette() {
+            if (cassetteAudio.paused) {
+                cassetteAudio.play().then(() => {
+                    document.getElementById('cassette').classList.add('playing');
+                    document.getElementById('cassette-button').textContent = '❚❚ Pause';
+                    document.getElementById('cassette-status').textContent = 'Đang phát... ❤️';
+                }).catch(() => {
+                    document.getElementById('cassette-status').textContent = 'Không thể phát nhạc. Hãy kiểm tra link nhạc.';
+                });
+            } else {
+                cassetteAudio.pause();
+                document.getElementById('cassette').classList.remove('playing');
+                document.getElementById('cassette-button').textContent = '▶ Play';
+                document.getElementById('cassette-status').textContent = 'Đã tạm dừng';
+            }
+        }
+
+        cassetteAudio.addEventListener('ended', () => {
+            document.getElementById('cassette').classList.remove('playing');
+            document.getElementById('cassette-button').textContent = '▶ Play';
+            document.getElementById('cassette-status').textContent = 'Bấm Play để nghe lại ❤️';
+        });
     </script>
 </body>
 </html>
