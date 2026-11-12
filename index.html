@@ -249,7 +249,6 @@
             margin-bottom: 18px;
             animation: cheerPulse 1.8s ease-in-out infinite;
         }
-        #birthday-sound { display: none; }
         @keyframes cheerPulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.06); }
@@ -523,10 +522,7 @@
         <h1 class="bday-title">Happy Birthday</h1>
         <h2 class="bday-sub">Vợ Ngốc Của Anh! ❤️</h2>
         <p class="birthday-cheer" id="birthday-cheer">🎉 Chúc mừng sinh nhật vợ yêu! 🎉</p>
-        <audio id="birthday-sound" preload="auto">
-            <source src="birthday-celebration.mp3" type="audio/mpeg">
-        </audio>
-        
+
         <div class="bday-content">
             <div class="age-circle" id="age-number">18</div>
             <!-- THAY LINK ẢNH VỢ BẠN VÀO ĐÂY -->
@@ -615,11 +611,10 @@
         // === CONFETTI + SOUND EFFECT CHO TRANG HAPPY BIRTHDAY ===
         const confettiCanvas = document.getElementById('birthday-confetti');
         const confettiContext = confettiCanvas.getContext('2d');
-        const birthdaySound = document.getElementById('birthday-sound');
+        let birthdayAudioContext = null;
         let confettiPieces = [];
         let confettiAnimationId = null;
         let confettiStopTimer = null;
-        let previousScreenBeforeBirthday = null;
 
         function resizeConfettiCanvas() {
             const ratio = Math.min(window.devicePixelRatio || 1, 2);
@@ -692,14 +687,59 @@
             confettiPieces = [];
         }
 
+        // Mở khóa Web Audio ngay trong thao tác chạm vào ngọn nến.
+        function unlockBirthdayAudio() {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+
+            try {
+                if (!birthdayAudioContext) birthdayAudioContext = new AudioContextClass();
+                if (birthdayAudioContext.state === 'suspended') {
+                    birthdayAudioContext.resume().catch(() => {});
+                }
+            } catch (error) {
+                // Trình duyệt không hỗ trợ Web Audio: confetti vẫn chạy bình thường.
+            }
+        }
+
+        // Tiếng chime "ta-da" vui tươi, tạo trực tiếp bằng Web Audio (không cần file MP3).
+        function playBirthdaySound() {
+            if (!birthdayAudioContext) return;
+
+            try {
+                if (birthdayAudioContext.state === 'suspended') {
+                    birthdayAudioContext.resume().catch(() => {});
+                }
+
+                const now = birthdayAudioContext.currentTime;
+                const notes = [
+                    { frequency: 523.25, at: 0.00, duration: 0.30 },
+                    { frequency: 659.25, at: 0.16, duration: 0.34 },
+                    { frequency: 783.99, at: 0.32, duration: 0.38 },
+                    { frequency: 1046.50, at: 0.52, duration: 0.65 }
+                ];
+
+                notes.forEach(note => {
+                    const oscillator = birthdayAudioContext.createOscillator();
+                    const gain = birthdayAudioContext.createGain();
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(note.frequency, now + note.at);
+                    gain.gain.setValueAtTime(0.0001, now + note.at);
+                    gain.gain.linearRampToValueAtTime(0.11, now + note.at + 0.025);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + note.at + note.duration);
+                    oscillator.connect(gain);
+                    gain.connect(birthdayAudioContext.destination);
+                    oscillator.start(now + note.at);
+                    oscillator.stop(now + note.at + note.duration + 0.02);
+                });
+            } catch (error) {
+                // Nếu âm thanh không khả dụng, hiệu ứng hình ảnh vẫn hoạt động.
+            }
+        }
+
         function startBirthdayCelebration() {
             launchBirthdayConfetti();
-            if (birthdaySound) {
-                birthdaySound.currentTime = 0;
-                birthdaySound.play().catch(() => {
-                    // Âm thanh có thể bị chặn nếu trình duyệt chưa cho phép phát.
-                });
-            }
+            playBirthdaySound();
         }
 
         window.addEventListener('resize', resizeConfettiCanvas);
@@ -712,7 +752,6 @@
 
             if (currentId === 5 && nextId !== 5) stopBirthdayConfetti();
             if (nextId === 5) {
-                previousScreenBeforeBirthday = currentId;
                 setTimeout(() => {
                     if (nextScreen.classList.contains('active')) startBirthdayCelebration();
                 }, 550);
@@ -762,6 +801,7 @@
 
         // Hàm thổi tắt nến
         function blowCandle() {
+            unlockBirthdayAudio();
             const flame = document.getElementById('flame');
             flame.style.opacity = '0'; // Tắt lửa
             flame.style.transform = 'translateX(-50%) scale(0)';
