@@ -61,6 +61,14 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 0; overflow: hidden;
         }
+        #birthday-confetti {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
         .falling-flower {
             position: absolute; top: -10vh; font-size: 24px; opacity: 0.8;
             animation: fall linear infinite;
@@ -232,7 +240,20 @@
 
         /* === MÀN HÌNH 5: HAPPY BIRTHDAY === */
         .bday-title { font-family: 'Dancing Script', cursive; font-size: 3.5rem; color: var(--pink-dark); margin-bottom: 10px; text-align: center; }
-        .bday-sub { font-size: 1.5rem; font-weight: 700; color: #666; margin-bottom: 30px; }
+        .bday-sub { font-size: 1.5rem; font-weight: 700; color: #666; margin-bottom: 14px; }
+        .birthday-cheer {
+            color: var(--pink-dark);
+            font-weight: 700;
+            font-size: clamp(1rem, 2.8vw, 1.25rem);
+            text-align: center;
+            margin-bottom: 18px;
+            animation: cheerPulse 1.8s ease-in-out infinite;
+        }
+        #birthday-sound { display: none; }
+        @keyframes cheerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
         .bday-content { display: flex; align-items: center; gap: 30px; position: relative; z-index: 2; }
         
         .age-circle {
@@ -361,6 +382,8 @@
         @media (max-width: 768px) {
             .bday-content { flex-direction: column; gap: 15px; }
             .bday-title { font-size: 2.5rem; }
+            .bday-sub { font-size: 1.2rem; margin-bottom: 8px; }
+            .birthday-cheer { margin-bottom: 10px; }
             .age-circle { width: 120px; height: 120px; font-size: 4rem; }
 
             /* Giữ gallery 2 cột trên điện thoại, ảnh gọn để thấy đủ 4 tấm. */
@@ -427,6 +450,7 @@
 <body>
 
     <div class="effects-layer" id="effects-layer"></div>
+    <canvas id="birthday-confetti" aria-hidden="true"></canvas>
 
     <!-- 1. PHONG BÌ THƯ -->
     <section id="screen-1" class="screen active">
@@ -498,6 +522,10 @@
 
         <h1 class="bday-title">Happy Birthday</h1>
         <h2 class="bday-sub">Vợ Ngốc Của Anh! ❤️</h2>
+        <p class="birthday-cheer" id="birthday-cheer">🎉 Chúc mừng sinh nhật vợ yêu! 🎉</p>
+        <audio id="birthday-sound" preload="auto">
+            <source src="birthday-celebration.mp3" type="audio/mpeg">
+        </audio>
         
         <div class="bday-content">
             <div class="age-circle" id="age-number">18</div>
@@ -584,11 +612,111 @@
     </section>
 
     <script>
+        // === CONFETTI + SOUND EFFECT CHO TRANG HAPPY BIRTHDAY ===
+        const confettiCanvas = document.getElementById('birthday-confetti');
+        const confettiContext = confettiCanvas.getContext('2d');
+        const birthdaySound = document.getElementById('birthday-sound');
+        let confettiPieces = [];
+        let confettiAnimationId = null;
+        let confettiStopTimer = null;
+        let previousScreenBeforeBirthday = null;
+
+        function resizeConfettiCanvas() {
+            const ratio = Math.min(window.devicePixelRatio || 1, 2);
+            confettiCanvas.width = Math.floor(window.innerWidth * ratio);
+            confettiCanvas.height = Math.floor(window.innerHeight * ratio);
+            confettiContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+        }
+
+        function launchBirthdayConfetti() {
+            resizeConfettiCanvas();
+            const colors = ['#ff6b81', '#ffb6c1', '#ffd166', '#06d6a0', '#7bdff2', '#cdb4db', '#ffffff'];
+            const amount = window.innerWidth < 600 ? 115 : 190;
+            confettiPieces = Array.from({ length: amount }, () => ({
+                x: Math.random() * window.innerWidth,
+                y: -Math.random() * window.innerHeight * 0.8,
+                width: Math.random() * 7 + 4,
+                height: Math.random() * 10 + 5,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                speed: Math.random() * 3 + 2,
+                drift: Math.random() * 2 - 1,
+                rotation: Math.random() * Math.PI * 2,
+                spin: (Math.random() * 0.16 - 0.08),
+                opacity: Math.random() * 0.35 + 0.65
+            }));
+
+            if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
+            if (confettiStopTimer) clearTimeout(confettiStopTimer);
+
+            const startedAt = performance.now();
+            function animateConfetti(now) {
+                const elapsed = now - startedAt;
+                confettiContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+                confettiPieces.forEach(piece => {
+                    piece.y += piece.speed;
+                    piece.x += piece.drift + Math.sin(piece.y / 35) * 0.6;
+                    piece.rotation += piece.spin;
+
+                    if (piece.y > window.innerHeight + 20) {
+                        piece.y = -20;
+                        piece.x = Math.random() * window.innerWidth;
+                    }
+
+                    confettiContext.save();
+                    confettiContext.globalAlpha = piece.opacity;
+                    confettiContext.translate(piece.x, piece.y);
+                    confettiContext.rotate(piece.rotation);
+                    confettiContext.fillStyle = piece.color;
+                    confettiContext.fillRect(-piece.width / 2, -piece.height / 2, piece.width, piece.height);
+                    confettiContext.restore();
+                });
+
+                if (elapsed < 6500 && document.getElementById('screen-5').classList.contains('active')) {
+                    confettiAnimationId = requestAnimationFrame(animateConfetti);
+                } else {
+                    stopBirthdayConfetti();
+                }
+            }
+
+            confettiAnimationId = requestAnimationFrame(animateConfetti);
+            confettiStopTimer = setTimeout(stopBirthdayConfetti, 6800);
+        }
+
+        function stopBirthdayConfetti() {
+            if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
+            confettiAnimationId = null;
+            if (confettiStopTimer) clearTimeout(confettiStopTimer);
+            confettiStopTimer = null;
+            confettiContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            confettiPieces = [];
+        }
+
+        function startBirthdayCelebration() {
+            launchBirthdayConfetti();
+            if (birthdaySound) {
+                birthdaySound.currentTime = 0;
+                birthdaySound.play().catch(() => {
+                    // Âm thanh có thể bị chặn nếu trình duyệt chưa cho phép phát.
+                });
+            }
+        }
+
+        window.addEventListener('resize', resizeConfettiCanvas);
+
         // Hàm chuyển màn hình
         function nextScreen(currentId, nextId) {
             const currentScreen = document.getElementById(`screen-${currentId}`);
             const nextScreen = document.getElementById(`screen-${nextId}`);
             currentScreen.classList.remove('active');
+
+            if (currentId === 5 && nextId !== 5) stopBirthdayConfetti();
+            if (nextId === 5) {
+                previousScreenBeforeBirthday = currentId;
+                setTimeout(() => {
+                    if (nextScreen.classList.contains('active')) startBirthdayCelebration();
+                }, 550);
+            }
 
             if (currentId === 9 && nextId !== 9 && !cassetteAudio.paused) {
                 cassetteAudio.pause();
